@@ -30,9 +30,16 @@ def main():
         col_str = read_line(t, update)
         col = parse_color(col_str)
         t.writeln("RGB = ", ", ".join(format_component(c) for c in col[0:3]))
+        t.writeln("hex = ", format_hex(col))
 
 def format_component(s):
     return "{:.4}".format(s)
+
+def format_hex(col):
+    r = int(col[0] * 255)
+    g = int(col[1] * 255)
+    b = int(col[2] * 255)
+    return "0x{:x}{:x}{:x}".format(r,g,b)
 
 def parse_color(s):
     s = s.lstrip().rstrip().lower()
@@ -40,7 +47,36 @@ def parse_color(s):
         return parse_css(s[1:])
     if s.startswith("0x"):
         return parse_hex(s[2:])
+    if s.startswith("rgb"):
+        components = parse_color_tuple(s[3:], 3)
+        return parse_rgb(components)
+    if s.startswith("hsl"):
+        components = parse_color_tuple(s[3:], 3)
+        return parse_hsl(components)
     raise ColorParseError("Unrecognized format")
+
+def parse_color_tuple(s, n):
+    try:
+        s = s.lstrip("(").rstrip(")")
+        components = s.split(",")
+        assert(len(components) == n)
+    except:
+        raise ColorParseError("Malformed tuple")
+
+    try:
+        return [int(c) / 255 for c in components]
+    except:
+        try:
+            return [float(c) for c in components]
+        except:
+            raise ColorParseError("Bad tuple component values")
+
+def parse_rgb(components):
+    return (components[0], components[1], components[2], 1.0)
+
+def parse_hsl(components):
+    hls = colorsys.rgb_to_hls(components[0], components[1], components[2])
+    return (hls[0], hls[2], hls[1], 1.0)
 
 def parse_css(s):
     try:
