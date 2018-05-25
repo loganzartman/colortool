@@ -83,6 +83,10 @@ def parse_color(s):
         return parse_css(s[1:])
     if s.startswith("0x"):
         return parse_hex(s[2:])
+    if s.startswith("rgba"):
+        return parse_rgba(s[4:])
+    if s.startswith("hsla"):
+        return parse_hsl(s[4:])
     if s.startswith("rgb"):
         return parse_rgb(s[3:])
     if s.startswith("hsl"):
@@ -111,10 +115,19 @@ def parse_rgb(s):
     components, fmt = parse_color_tuple(s, 3)
     return (components[0], components[1], components[2], 1.0), "rgb({})".format(fmt)
 
+def parse_rgba(s):
+    components, fmt = parse_color_tuple(s, 4)
+    return components, "rgba({})".format(fmt)
+
 def parse_hsl(s):
     components, fmt = parse_color_tuple(s, 3)
     hls = colorsys.rgb_to_hls(components[0], components[1], components[2])
     return (hls[0], hls[2], hls[1], 1.0), "hsl({})".format(fmt)
+
+def parse_hsla(s):
+    components, fmt = parse_color_tuple(s, 4)
+    hls = colorsys.rgb_to_hls(components[0], components[1], components[2])
+    return (hls[0], hls[2], hls[1], components[3]), "hsla({})".format(fmt)
 
 def parse_css(s):
     try:
