@@ -1,5 +1,6 @@
 from pytermfx import Terminal, Color
 from pytermfx.tools import read_line, draw_hline
+from css_named_colors import name_color_map as CSS_NAMED_COLORS
 import colorsys
 
 SWATCH_WIDTH = 4
@@ -68,6 +69,8 @@ def parse_color(s):
         return parse_rgb(s[3:])
     if s.startswith("hsl"):
         return parse_hsl(s[3:])
+    if s in CSS_NAMED_COLORS:
+        return parse_css_named(s)
     raise ColorParseError("Unrecognized format")
 
 def parse_color_tuple(s, n):
@@ -112,6 +115,11 @@ def parse_css(s):
         return (r / 255.0, g / 255.0, b / 255.0, 1.0), "CSS (shorthand)"
     except:
         raise ColorParseError("Malformed CSS hex string")
+
+def parse_css_named(s):
+    if s not in CSS_NAMED_COLORS:
+        raise ColorParseError("'{}' is not a CSS named color.".format(s))
+    return parse_css(CSS_NAMED_COLORS[s][1:])[0], "CSS (named)"
 
 def parse_hex(s):
     try:
