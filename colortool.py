@@ -25,7 +25,7 @@ def main():
             t.write(">" * SWATCH_WIDTH," ")
         finally:
             t.cursor_save()
-            t.style(Color.hex(0x707070))
+            t.style(Color.hex(0x909090))
             t.cursor_move(0, 1).clear_to_end().write(fmt)
             t.cursor_restore().style_reset()
             t.write(s)
@@ -45,31 +45,37 @@ def main():
             t.writeln().writeln()
 
             # write converted colors
-            formats = (("RGB", format_rgb(col)),
-                       ("Hex", format_hex(col)),
-                       ("CSS", format_css(col)))
+            formats = (("RGBA", format_rgba(col)),
+                       ("RGBA (hex)", format_hex_rgba(col)),
+                       ("RGB (hex)", format_hex_rgb(col)))
+            format_name_width = max((len(f[0]) for f in formats)) + 2
             for name, value in formats:
-                t.style(Color.hex(0x707070)).write(name, ":\t")
+                padding = format_name_width - (len(name) + 1)
+                t.style(Color.hex(0x909090)).write(name, ":", " " * padding)
                 t.style_reset().writeln(value)
             t.flush()
-        except:
+        except ColorParseError:
             t.writeln().writeln()
             t.writeln("Not a color.")
 
 def format_component(s):
     return "{:.4}".format(s)
 
-def format_hex(col):
+def format_hex_rgba(col):
+    r = int(col[0] * 0xFF) << 24
+    g = int(col[1] * 0xFF) << 16
+    b = int(col[2] * 0xFF) << 8
+    a = int(col[3] * 0xFF)
+    return "0x{:08x}".format(r | g | b | a)
+
+def format_hex_rgb(col):
     r = int(col[0] * 0xFF) << 16
     g = int(col[1] * 0xFF) << 8
     b = int(col[2] * 0xFF)
     return "0x{:06x}".format(r | g | b)
 
-def format_css(col):
-    return "#" + format_hex(col)[2:]
-
-def format_rgb(col):
-    return ", ".join(format_component(c) for c in col[0:3])
+def format_rgba(col):
+    return ", ".join(format_component(c) for c in col)
 
 def parse_color(s):
     s = s.lstrip().rstrip().lower()
