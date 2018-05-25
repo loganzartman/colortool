@@ -37,14 +37,21 @@ def main():
         t.writeln()
         t.cursor_move(0, -1).flush()
         
-        # read and parse color
         try:
+            # read and parse color
             col_str = read_line(t, update)
             col, fmt = parse_color(col_str)
+        
             t.writeln()
             draw_hline(t)
-            t.writeln("RGB = ", ", ".join(format_component(c) for c in col[0:3]))
-            t.writeln("hex = ", format_hex(col))
+
+            # write converted colors
+            formats = (("RGB", format_rgb(col)),
+                       ("Hex", format_hex(col)))
+            for name, value in formats:
+                t.style(Color.hex(0x707070)).write(name, ":\t")
+                t.style_reset().writeln(value)
+            t.flush()
         except:
             t.writeln()
             draw_hline(t)
@@ -54,10 +61,13 @@ def format_component(s):
     return "{:.4}".format(s)
 
 def format_hex(col):
-    r = int(col[0] * 255)
-    g = int(col[1] * 255)
-    b = int(col[2] * 255)
-    return "0x{:x}{:x}{:x}".format(r,g,b)
+    r = int(col[0] * 0xFF) << 16
+    g = int(col[1] * 0xFF) << 8
+    b = int(col[2] * 0xFF)
+    return "0x{:06x}".format(r | g | b)
+
+def format_rgb(col):
+    return ", ".join(format_component(c) for c in col[0:3])
 
 def parse_color(s):
     s = s.lstrip().rstrip().lower()

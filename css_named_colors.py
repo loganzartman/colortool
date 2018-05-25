@@ -1,4 +1,5 @@
 name_color_map = {
+    "transparent": "#00000000",
     "aliceblue": "#f0f8ff",
     "antiquewhite": "#faebd7",
     "aqua": "#00ffff",
