@@ -1,5 +1,5 @@
 from pytermfx import Terminal, Color
-from pytermfx.tools import read_line, draw_hline
+from pytermfx.tools import read_line
 from css_named_colors import name_color_map as CSS_NAMED_COLORS
 import colorsys
 
@@ -42,19 +42,18 @@ def main():
             col_str = read_line(t, update)
             col, fmt = parse_color(col_str)
         
-            t.writeln()
-            draw_hline(t)
+            t.writeln().writeln()
 
             # write converted colors
             formats = (("RGB", format_rgb(col)),
-                       ("Hex", format_hex(col)))
+                       ("Hex", format_hex(col)),
+                       ("CSS", format_css(col)))
             for name, value in formats:
                 t.style(Color.hex(0x707070)).write(name, ":\t")
                 t.style_reset().writeln(value)
             t.flush()
         except:
-            t.writeln()
-            draw_hline(t)
+            t.writeln().writeln()
             t.writeln("Not a color.")
 
 def format_component(s):
@@ -65,6 +64,9 @@ def format_hex(col):
     g = int(col[1] * 0xFF) << 8
     b = int(col[2] * 0xFF)
     return "0x{:06x}".format(r | g | b)
+
+def format_css(col):
+    return "#" + format_hex(col)[2:]
 
 def format_rgb(col):
     return ", ".join(format_component(c) for c in col[0:3])
